@@ -3,6 +3,12 @@
 #directory structure
 
 HEAD
+    
+    
+    
+    
+    
+    
     --diarization
     --DIAR_4comit
 	--DIAR_MAIN.py
