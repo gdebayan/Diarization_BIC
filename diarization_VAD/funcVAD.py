@@ -26,7 +26,7 @@ def vadfn(x,nsh,fs,feat):
     count=0
     ind=0
     Nsh=fs*nsh #frame window shift in samples
-    Nw=fs*0.030#frame window size in samples
+    Nw=fs*0.030#frame window size in samples(has to be 30ms for webrtcvad)
 
 
     
@@ -43,7 +43,7 @@ def vadfn(x,nsh,fs,feat):
     while(i<lenx-Nw):
         j=0
         while(j<Nw):
-            frame[j,ind]=x[count]
+            frame[int(j),int(ind)]=x[int(count)]
             j=j+1
             count=count+1
         ind=ind+1
