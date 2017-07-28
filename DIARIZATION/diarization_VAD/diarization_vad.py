@@ -1,6 +1,7 @@
 import random
 import sys
 import os
+sys.path.insert(0,'./..')
 import numpy as np
 import math
 import soundfile as sf
@@ -18,7 +19,7 @@ from read import readVADFile
 from clus_vad_spk import clus_vad1_spk
 
 
-def diar_vad(wav_file,feat_file,pfo,pflin,tag,numfrwin,nsh,MDT,vadtxt,spkrs,filetype,verbose,feattype):
+def diar_vad(wav_file,feat_file,pfo,pflin,tag,numfrwin,nsh,MDT,vadtxt,spkrs,filetype,verbose,feattype,amplitude,dist_1):
 
 
     #Making a webrtcvad Object. For more information , Visit: https://github.com/wiseman/py-webrtcvad
@@ -123,7 +124,7 @@ def diar_vad(wav_file,feat_file,pfo,pflin,tag,numfrwin,nsh,MDT,vadtxt,spkrs,file
             frms_start.append(speech_seg_start[u])
             frms_end.append(speech_seg_end[u])
         else:
-            time_stamp,frame_stamp,ts_lin,fs_lin,clus,cluslin=segmentvad( speech_seg[u],1,4.2,numfrwin,nsh,pflin,fs)
+            time_stamp,frame_stamp,ts_lin,fs_lin,clus,cluslin=segmentvad( speech_seg[u],amplitude,dist_1,numfrwin,nsh,pflin,fs)
             #segmentvad-->Does Segmeatation followed by linear clustering on the speech segments.
 
             #Outputs
@@ -136,8 +137,8 @@ def diar_vad(wav_file,feat_file,pfo,pflin,tag,numfrwin,nsh,MDT,vadtxt,spkrs,file
 
             #Inputs
             #speech_seg[i]--->ith speech segment
-            #1-->Amplitude Threshold for Peak Detection ( See documentation of peakdetect.py for more information)
-            #4.2-->Distance Threshold for Peak Detection ( See documentation of peakdetect.py for more information)
+            #amplitude-->Amplitude Threshold for Peak Detection ( See documentation of peakdetect.py for more information)
+            #dist_1-->Distance Threshold for Peak Detection ( See documentation of peakdetect.py for more information)
             #numfrwin--> Segmentation Window Size. eg. numfrwin=100;nsh=0.010 ;Segmentation Window= 100*0.010=1s
             #nsh--> frame shift (0.010 default)
             #pflin--> Penalty Factor For Linear CLustering.(in BIC formula)
@@ -210,7 +211,7 @@ def diar_vad(wav_file,feat_file,pfo,pflin,tag,numfrwin,nsh,MDT,vadtxt,spkrs,file
 
     #Write to File
     pf1=pfo
-    str12=tag+'_'+str(spkrs)+'_'+str(pfo)+'_'+str(pflin)+'.txt'
+    str12='./results/'+tag+'_'+str(spkrs)+'_'+str(pfo)+'_'+str(pflin)+'.txt'
     text_file = open(str12, "w")
 
     data_time=np.zeros((len(clus_final),3))

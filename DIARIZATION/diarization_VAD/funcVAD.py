@@ -1,6 +1,7 @@
 import random
 import sys
 import os
+sys.path.insert(0,'./..')
 import numpy as np
 import math
 import soundfile as sf
@@ -22,6 +23,7 @@ def vadfn(x,nsh,fs,feat):
 
 
     lenx=len(x)
+    print('lenx : '+str(lenx))
     i=0
     count=0
     ind=0
@@ -34,7 +36,7 @@ def vadfn(x,nsh,fs,feat):
     numfram=min(numfram1,len(feat[1,:]))#taking min(len(features),numfram) to avoid mismatch. Usually will be same.
     
     
-    frame=np.zeros((int(Nw),numfram)) #frame shape
+    frame=np.zeros((int(Nw),numfram1)) #frame shape
 
     
 
@@ -52,7 +54,7 @@ def vadfn(x,nsh,fs,feat):
         count=i
 
 
-   
+       
     feat_1=feat[:,0:numfram]
     vad_flag=np.zeros((numfram,))
     #checking each frame if Voiced or Unvoiced.Using webrtcvad library

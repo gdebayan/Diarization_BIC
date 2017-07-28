@@ -1,6 +1,7 @@
 import random
 import sys
 import os
+sys.path.insert(0,'./..')
 import numpy as np
 import math
 import soundfile as sf
@@ -81,10 +82,25 @@ def segmentvad(feat,amplitude,dist_1,numfrwin,nsh,pflin,fs):
          mean1=np.mean(w1,1)
          mean2=np.mean(w2,1)
          cov1=np.var(w1,1)
+         cov11=cov1
+
+         det1=0
+         for h in range(0,len(cov11)):
+             det1=det1+math.log(cov11[h])
+         
          cov1=np.diag(cov1)
          
          
+         
+         
          cov2=np.var(w2,1)
+         cov22=cov2
+         det2=0
+         for g in range(0,len(cov22)):
+             det2=det2+math.log(cov22[g])
+             
+
+         
          cov2=np.diag(cov2)
 
          mean1.shape=(1,dim)
@@ -96,8 +112,9 @@ def segmentvad(feat,amplitude,dist_1,numfrwin,nsh,pflin,fs):
          mean2.shape=(dim,1)
          dist2=np.dot(dist2,(mean2-mean1))
          k=dim
-         dist3=(np.linalg.det(cov2)/np.linalg.det(cov1))
-         dist3=np.log(dist3)
+         #dist3=(np.linalg.det(cov2)/np.linalg.det(cov1))
+         dist3=det2-det1
+         #dist3=np.log(dist3)
          dist=0.5*(dist1+dist2-k+dist3)
         
          d.append(dist)

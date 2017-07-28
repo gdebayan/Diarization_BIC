@@ -27,20 +27,24 @@ def bicdist_single(x,y,pf):
     meanz=np.mean(z,1)
 
     covx=np.var(x,1)
-    covx=np.diag(covx)
+    #print(covx)
+    #covx=np.diag(covx)
+    det1=0#log(dex) performing
+    for i in range(0,len(covx)):
+        det1=det1+math.log(covx[i])
 
+    det2=0      
     covy=np.var(y,1)
-    covy=np.diag(covy)
+    for j in range(0,len(covy)):
+        det2=det2+math.log(covy[j])
+    
+    #covy=np.diag(covy)
 
     covz=np.var(z,1)
-    covz=np.diag(covz)
-
-    det1=np.linalg.det(covx)
-    det1=math.log(det1)
-    det2=np.linalg.det(covy)
-    det2=math.log(det2)
-    det3=np.linalg.det(covz)
-    det3=math.log(det3)
+    det3=0
+    for k in range(0,len(covz)):
+        det3=det3+math.log(covz[k])
+    
     d,n1=x.shape
     d,n2=y.shape
     d,n3=z.shape

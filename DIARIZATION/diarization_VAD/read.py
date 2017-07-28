@@ -1,6 +1,7 @@
 import random
 import sys
 import os
+sys.path.insert(0,'./..')
 import numpy as np
 import math
 import soundfile as sf

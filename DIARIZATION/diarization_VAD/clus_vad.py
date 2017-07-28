@@ -1,6 +1,7 @@
 import random
 import sys
 import os
+sys.path.insert(0,'./..')
 import numpy as np
 import math
 import soundfile as sf
@@ -12,7 +13,7 @@ import webrtcvad
 from seg_vad import segmentvad
 from bic_single_gaus import bicdist_single
 
-def clus_vad1_spk(cluslin,pfo,tag,spkrs,verbose):
+def clus_vad1(cluslin,pfo,tag,verbose):
 
 
     
@@ -35,12 +36,11 @@ def clus_vad1_spk(cluslin,pfo,tag,spkrs,verbose):
     tslin=[]
     dist_dict={}
 
+   
     #Performing Agglomerative Clustering
     #Using Dictionaries to store Values of BIC Values calculated in the previous iteration, so that dont need to recompute same values.
     
-
-
-    while((len(clus1)>spkrs)):
+    while((len(clus1)>1)&(bic<0)):
         i_ind=[]
         j_ind=[]
         dist=[]
@@ -75,17 +75,18 @@ def clus_vad1_spk(cluslin,pfo,tag,spkrs,verbose):
 
         bic=min(dist)
         if(verbose==1):
+            
             print('BIC SCORE: '+str(bic))
         bicact.append(bic)
         c1=dist.index(bic)
-        el1=i_ind[c1]
-        el2=j_ind[c1]#Merge segments :el1 and el2
+        el1=i_ind[c1]#Merge segments :el1 and el2
+        el2=j_ind[c1]
         #print(el1)
         #print(el2)
         if(verbose==1):
             print('ELEMENTS MERGED ARE :'+str(el1)+' and '+str(el2))
         clusnew=[]
-        
+        gmmodelnew=[]
       
         dictnew={}
         
@@ -139,5 +140,5 @@ def clus_vad1_spk(cluslin,pfo,tag,spkrs,verbose):
         count1=count1+1
         if(verbose==1):
             print('Number of Clusters Remaining '+str(len(clus1)))
-        
+
     return clus1

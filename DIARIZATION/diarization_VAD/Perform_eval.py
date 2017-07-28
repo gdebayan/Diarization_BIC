@@ -1,6 +1,7 @@
 import random
 import sys
 import os
+sys.path.insert(0,'./..')
 import numpy as np
 import math
 import soundfile as sf
@@ -69,12 +70,20 @@ parser.add_argument('-feattype','--feattype',help='csv/numpy',default='csv')
 
 parser.add_argument('-spkrs','--spkrs',help='Number of Speakers to get clustered to',default='None')
 #Number of speakers in the wav file. Wil  get clustered to these many clusters
-parser.add_argument('-filetype','--filetype',help='type of output file" rttm/standard. Type -filetype rttm for RTTM format, or else standard',default='standard')
+parser.add_argument('-filetype','--filetype',help='type of output file" rttm/standard. Type -filetype rttm for RTTM format, or else standard',default='rttm')
 #if rttm format specified, O/P : SPEAKER <tag> 1 <Start Time> <Duration Time> <NA> <NA> <SpkID> <NA> <NA>
 #default: <SPID> <START FRAME> <END FRAME>
 #To activate rttm output mode: -filetype rttm
 
 parser.add_argument('-verbose','--verbose',help='1:Show Step by Step output ; 0:Show Only Required Output; 1 by default ',default='1')
+
+parser.add_argument('-groundtruth','--groundtruth',help='Location of ground truth file',default='0',required='True')
+#Location 
+
+parser.add_argument('-amplitude','--amplitude',help='Amplitude Threshold For Peak Detection during Segmentation',default='1')
+#See documentation in peakdetect.py for more information
+parser.add_argument('-dist_1','--dist_1',help='Distance Threshold for Peak Detection during Segmentation ',default='4.2')
+#See documentation in peakdetect.py for more information
 
 
 #OUTPUT TEXT FILE WILL BE PRESENT in : ./current dicrectory
@@ -92,52 +101,57 @@ filetype=results.filetype
 nsh=results.resolution
 verbose=results.verbose
 feattype=results.feattype
+amplitude=results.amplitude
+dist_1=results.dist_1
 
-data_time,data_frame,data_perfrm,datafrm_sil,datatim_sil=diar_vad(wav_file,feat_file,float(pfo),float(pflin),(tag),int(numfrwin),float(nsh),int(MDT),vad,spkrs,filetype,int(verbose),feattype)
+ref=results.groundtruth
 
-#data_time=[<spkid> , <SPEAKER start time> , <SPEAKER end time> ]; NO SIL INCLUDED
-#data_frame=[<spkid> , <SPEAKER start frame> , <SPEAKER end frame>] ; NO SIL INCLUDED
-#data_perfrm=[<SPKID>] #Per Frame SPKID; 'SIL' for silence
-#datafrm_sil=[<spkid> , <SPEAKER start frame> , <SPEAKER end frame>] ; SIL INCLUDED
-#datatim_sil=[<spkid> , <SPEAKER start time> , <SPEAKER end time> ]; SIL INCLUDED
+filetype='rttm'
+pflin1=[0,0.5,1,1.5,2,2.5,3]
 
-#Instructions on using diar_vad() from another script
-#wav_file:str:Location of the wav file
+if(spkrs=='None'):
+    spkrs1=['2','3','4','5','6','7','8','9']
+else:
+    spkrs1=[]
+    spkrs1.append(spkrs)
 
-#feat_file:str: Location of the feat .csv file . Pass 'NoneProvided' to make the system extract features
+dat_der=[]
+#ref='/home/deb/diarnewcheck/diarization_VAD/results/NIST_20051024-0930_hsum_NONE.part1.rttm'
 
-#NOTE: If want to pass a Numpy Matrix , in the 'feattype' argument pass :str:'numpy'; 
-#If Numpy Matrix Being Passed, Shape:(Dimension x Samples)
-
-#feattype :str: 'csv'-->If passing CSV File to feat_file OR Making system EXTRACT FEATURE
-#         :str: 'numpy'---->If passing a numpy Feature Matrix to feat_file. Shape=(dimension, samples)
-
-#pfo:float:Penalty Factor for Hierarchical CLustering. Set to '1' Usually
-
-#pflin:float: Penalty Factor for Linear Clustering. Set to '2.1' Usually
-
-#tag:String
-
-#numfrwin: int:100 usually
-
-#nsh:float: 0.010 Window Shift during feature extraction
-
-#MDT:int: 30 usually
-
-#vad:str: location of VAD File.
-
-#spkrs:str:'None'--->If Thresholding based on BIC
-#     :str: eg.: '4'----> Give the number of speakers in String format (If thresholding based on number of speakers)
-
-#filetype:str. 'rttm' for rttm format output textfile
-#              'standard' for default format output textfile
-
-#verbose:int:1-->SHOW ALL O/P. 0---->Show Minimum O/P 
+#data_time,data_frame,data_perfrm,datafrm_sil,datatim_sil=diar_vad(wav_file,feat_file,float(pfo),float(pflin),(tag),int(numfrwin),float(nsh),int(MDT),vad,spkrs,filetype,int(verbose),feattype)
 
 
+for i in range(0,len(pflin1)):
+    for j in range(0,len(spkrs1)):
+        pflin=pflin1[i]
+        spkrs=spkrs1[j]
+        data_time,data_frame,data_perfrm,datafrm_sil,datatim_sil=diar_vad(wav_file,feat_file,float(pfo),float(pflin),(tag),int(numfrwin),float(nsh),int(MDT),vad,spkrs,filetype,int(verbose),feattype,float(amplitude),float(dist_1))
 
 
+    
+        actual='./results/'+tag+'_'+str(spkrs)+'_'+str(float(pfo))+'_'+str(float(pflin))+'.txt'+" | grep \"OVERALL SPEAKER DIARIZATION ERROR\" | cut -d' ' -f7 > tmp_file"
 
+        str1="perl md-eval-v21.pl -c 0.25 -r "+ref+" -s "+actual
+
+        os.system(str1)
+
+        f = open('tmp_file', "r")
+        words = f.read().split()
+
+        num=0
+        for w in words:
+              num=((float((w)))) #each index
+             
+        f.close()
+
+        tmp=np.array([float(num),float(pflin),float(spkrs)])
+        dat_der.append(tmp)    
+
+dat_der=np.array(dat_der)
+
+#a = numpy.asarray([ [1,2,3], [4,5,6], [7,8,9] ])
+str2='./eval_res/'+tag+'.csv'
+np.savetxt(str2, dat_der, delimiter=",")
 
 
 
